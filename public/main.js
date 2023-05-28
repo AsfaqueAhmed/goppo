@@ -1,8 +1,3 @@
-import './style.css';
-
-import firebase from 'firebase/app';
-import 'firebase/firestore';
-
 const firebaseConfig = {
     apiKey: "AIzaSyCnIp8y6Zz3Z21ImFpKz7v8B1tRYW8CXjw",
     authDomain: "goppo-24a76.firebaseapp.com",
