@@ -10,8 +10,6 @@ const servers = {
 const firebaseConfig = {
   apiKey: "AIzaSyCnIp8y6Zz3Z21ImFpKz7v8B1tRYW8CXjw",
   authDomain: "goppo-24a76.firebaseapp.com",
-  databaseURL:
-    "https://goppo-24a76-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "goppo-24a76",
   storageBucket: "goppo-24a76.appspot.com",
   messagingSenderId: "515280572437",
@@ -31,13 +29,13 @@ let peerConnection = null;
 
 // HTML elements
 const joinRoomButton = document.getElementById("join");
-const roomNameField = document.getElementById("room-name");
+const roomNameField = document.getElementById("rome-name");
 
 // 1. Setup media sources
 
 joinRoomButton.onclick = async () => {
   const roomRef = firestore.collection("rooms").doc(roomNameField.value);
-  const roomSnapshot = roomRef.get();
+  const roomSnapshot =await roomRef.get();
 
   //Get local stream
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -51,28 +49,31 @@ joinRoomButton.onclick = async () => {
   localStream.getTracks().forEach((track) => {
     peerConnection.addTrack(track, localStream);
   });
-
+  console.log(roomSnapshot.exists);
+  console.log(roomSnapshot.data());
   if (roomSnapshot.exists) {
-    _joinRoom(roomName.value);
+    _joinRoom(roomNameField.value);
   } else {
-    _createRoom(roomName.value);
+    _createRoom(roomNameField.value);
   }
 
-  document.getElementById("#remote").srcObject = remoteStream;
+  document.getElementById("remote").srcObject = remoteStream;
 };
 
 async function _createRoom(roomName) {
-  const roomRef = firestore.collection("rooms").doc(roomName.value);
+  const roomRef = firestore.collection("rooms").doc(roomName);
   const callerCandidatesCollection = roomRef.collection("callerCandidates");
   const calleeCandidatesCollection = roomRef.collection("calleeCandidates");
 
-  var offerDescription = peerConnection.createOffer();
+  var offerDescription = await peerConnection.createOffer();
   peerConnection.setLocalDescription(offerDescription);
 
+  console.log(roomName);
+  console.log(offerDescription);
   const roomWithOffer = {
     offer: {
-      type: offer.type,
-      sdp: offer.sdp,
+      type: offerDescription.type,
+      sdp: offerDescription.sdp,
     },
   };
   await roomRef.set(roomWithOffer);
@@ -108,7 +109,7 @@ async function _createRoom(roomName) {
 }
 
 async function _joinRoom(roomName) {
-  const roomRef = firestore.collection("rooms").doc(roomName.value);
+  const roomRef = firestore.collection("rooms").doc(roomName);
   const callerCandidatesCollection = roomRef.collection("callerCandidates");
   const calleeCandidatesCollection = roomRef.collection("calleeCandidates");
 
