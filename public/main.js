@@ -49,15 +49,17 @@ joinRoomButton.onclick = async () => {
   localStream.getTracks().forEach((track) => {
     peerConnection.addTrack(track, localStream);
   });
-  console.log(roomSnapshot.exists);
-  console.log(roomSnapshot.data());
+  
   if (roomSnapshot.exists) {
     _joinRoom(roomNameField.value);
   } else {
     _createRoom(roomNameField.value);
   }
+  const audioCtx = new AudioContext();
+  const source = audioCtx.createMediaStreamSource(stream);
+  const dest = audioCtx.createMediaStreamDestination();
 
-  document.getElementById("remote").srcObject = remoteStream;
+  source.connect(dest);
 };
 
 async function _createRoom(roomName) {
@@ -142,7 +144,7 @@ async function _joinRoom(roomName) {
   };
   await roomRef.update(roomWithAnswer);
 
-  calleeCandidatesCollection.onSnapshot((snapshot) => {
+  callerCandidatesCollection.onSnapshot((snapshot) => {
     snapshot.docChanges().forEach(async (change) => {
       if (change.type === "added") {
         let data = change.doc.data();
